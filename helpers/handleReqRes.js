@@ -32,4 +32,4 @@ handler.handleReqRes = (req, res) => {
     });
 };
 
-exports.module = handler;
+module.exports = handler;
