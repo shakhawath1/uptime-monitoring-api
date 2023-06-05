@@ -12,8 +12,8 @@
 const handler = {};
 
 //
-handler.sampleHandler = () => {
-    console.log('sample route');
+handler.notFoundHandler = () => {
+    console.log('Not Found');
 };
 
 module.exports = handler;
