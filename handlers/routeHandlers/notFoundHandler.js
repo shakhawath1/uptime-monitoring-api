@@ -8,7 +8,7 @@
 
 // dependencies
 
-// module scaffoulding
+// module scaffolding
 const handler = {};
 
 //

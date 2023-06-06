@@ -1,7 +1,14 @@
+/*
+ * Title: Sample Handler
+ * Description: Sample Handler
+ * Author:
+ * Date:
+ *
+ */
 // dependencies
 const { sampleHandler } = require('./handlers/routeHandlers/sampleHandler');
 
-// module scaffoulding
+// module scaffolding
 const routes = {
     sample: sampleHandler,
 };
