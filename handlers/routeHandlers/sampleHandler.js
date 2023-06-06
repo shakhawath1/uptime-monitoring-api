@@ -1,9 +1,9 @@
 /*
+ * Title: Sample Handler
+ * Description: Sample Handler
+ * Author:
+ * Date:
  *
- *
- *
- *
- **
  */
 
 // dependencies
@@ -12,8 +12,12 @@
 const handler = {};
 
 //
-handler.sampleHandler = () => {
-    console.log('sample route');
+handler.sampleHandler = (requestProperties, callback) => {
+    console.log(requestProperties);
+
+    callback(200, {
+        message: 'This is sample route.',
+    });
 };
 
 module.exports = handler;
