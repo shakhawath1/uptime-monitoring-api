@@ -26,7 +26,6 @@ environments.production = {
 const currentEnvironment =
     typeof process.env.NODE_ENV === 'string' ? process.env.NODE_ENV : 'staging';
 
-console.log(process.env.NODE_ENV);
 // export corresponding environment object
 const envrionmentToExport =
     typeof environments[currentEnvironment] === 'object'
