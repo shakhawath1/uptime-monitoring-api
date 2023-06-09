@@ -8,7 +8,7 @@ const data = require('./lib/data');
 const app = {};
 
 // testing
-data.create('test', 'newF', { name: 'Shakhawath', country: 'Bangladesh' }, (err) => {
+data.delete('test', 'newF', (err) => {
     console.log(err);
 });
 
