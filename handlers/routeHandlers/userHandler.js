@@ -7,6 +7,7 @@
  */
 
 // dependencies
+const { hash } = require('../../helpers/utilities');
 const data = require('../../lib/data');
 // const { parseJson } = require('../../helpers/utilities');
 
@@ -66,7 +67,7 @@ handler._users.post = (requestProperties, callback) => {
                     firstName,
                     lastName,
                     phone,
-                    password,
+                    password:hash(password),
                     tosAgreement,
                 };
                 // create user
