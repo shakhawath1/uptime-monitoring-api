@@ -9,7 +9,6 @@
 // dependencies
 const { hash, parseJSON } = require('../../helpers/utilities');
 const data = require('../../lib/data');
-// const { parseJson } = require('../../helpers/utilities');
 
 // module scaffolding
 const handler = {};
@@ -127,7 +126,77 @@ handler._users.get = (requestProperties, callback) => {
 };
 
 // update user
-handler._users.put = (requestProperties, callback) => {};
+handler._users.put = (requestProperties, callback) => {
+    // check the phone number if valid
+    const phone =
+        typeof requestProperties.body.phone === 'string' &&
+        requestProperties.body.phone.trim().length === 11
+            ? requestProperties.body.phone
+            : false;
+
+    if(phone){
+        // lookup the user
+        const firstName =
+        typeof requestProperties.body.firstName === 'string' &&
+        requestProperties.body.firstName.trim().length > 0
+            ? requestProperties.body.firstName
+            : false;
+
+    const lastName =
+        typeof requestProperties.body.lastName === 'string' &&
+        requestProperties.body.lastName.trim().length > 0
+            ? requestProperties.body.lastName
+            : false;
+
+    const password =
+        typeof requestProperties.body.password === 'string' &&
+        requestProperties.body.password.trim().length > 0
+            ? requestProperties.body.password
+            : false;
+
+    if(firstName || lastName || password){
+        // lookup the uesr
+        data.read('users', phone,(err, uData)=>{
+            const userData = {...parseJSON(uData)};
+            if(!err && uData){
+                if(firstName){
+                    userData.firstName = firstName;
+                }
+                if(lastName){
+                    userData.lastName  = lastName;
+                }
+                if(password){
+                    userData.password  = hash(password);
+                }
+    
+                data.update('users', phone, userData, (err2)=>{
+                    if(!err2){
+                        callback(200,{
+                            message:'User was updated successfully!'
+                        })
+                    }else{
+                        callback(500,{
+                            error: 'There was a problem in the server side!',
+                        });
+                    }
+                })
+            }else{
+                callback(400,{
+                    error:'You have a problem in your request.'
+                })
+            }
+        })
+    }else{
+        callback(400,{
+            error:'You have a problem in your request.'
+        })
+    }
+    }else{
+        callback(400,{
+            error:'Invalid phone number, please try again.'
+        })
+    }
+};
 
 // delete user
 handler._users.delete = (requestProperties, callback) => {
