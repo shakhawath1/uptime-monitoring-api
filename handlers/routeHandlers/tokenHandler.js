@@ -26,7 +26,7 @@ handler.tokenHandler = (requestProperties, callback) => {
 
 handler._token = {};
 
-// create user
+// create token
 handler._token.post = (requestProperties, callback) => {
     const phone =
         typeof requestProperties.body.phone === 'string' &&
@@ -53,7 +53,7 @@ handler._token.post = (requestProperties, callback) => {
                 }
 
                 // store the token
-                data.create('tokens', phone, tokenObject, (err2) => {
+                data.create('tokens', tokenId, tokenObject, (err2) => {
                     if (!err && tokenObject) {
                         callback(200, tokenObject)
                     } else {
@@ -75,123 +75,90 @@ handler._token.post = (requestProperties, callback) => {
     }
 };
 
-// get user
+// get token
 handler._token.get = (requestProperties, callback) => {
     // check the phone number is valide
-    const phone =
-        typeof requestProperties.queryStringObject.phone === 'string' &&
-            requestProperties.queryStringObject.phone.trim().length === 11
-            ? requestProperties.queryStringObject.phone
+    const id =
+        typeof requestProperties.queryStringObject.id === 'string' &&
+            requestProperties.queryStringObject.id.trim().length === 20
+            ? requestProperties.queryStringObject.id
             : false;
 
-    if (phone) {
-        // lookup the user
-        data.read('users', phone, (err, u) => {
-            const user = { ...parseJSON(u) };
+    if (id) {
+        // lookup the token
+        data.read('tokens', id, (err, tokenData) => {
+            const token = { ...parseJSON(tokenData) };
 
-            if (!err && user) {
-                delete user.password;
-                callback(200, user);
+            if (!err && token) {
+                callback(200, token);
             } else {
                 callback(404, {
-                    error: 'Requestd user was not found',
+                    error: 'Requestd token was not found',
                 });
             }
         });
     } else {
         callback(404, {
-            error: 'Requestd user was not found',
+            error: 'Requestd token was not found.',
         });
     }
 };
 
 // update user
 handler._token.put = (requestProperties, callback) => {
-    // check the phone number if valid
-    const phone =
-        typeof requestProperties.body.phone === 'string' &&
-            requestProperties.body.phone.trim().length === 11
-            ? requestProperties.body.phone
+    // check the token if valid
+    const id =
+        typeof requestProperties.body.id === 'string' &&
+            requestProperties.body.id.trim().length === 20
+            ? requestProperties.body.id
             : false;
 
-    if (phone) {
-        // lookup the user
-        const firstName =
-            typeof requestProperties.body.firstName === 'string' &&
-                requestProperties.body.firstName.trim().length > 0
-                ? requestProperties.body.firstName
-                : false;
+    const extend =
+        typeof requestProperties.body.extend === 'boolean' &&
+            requestProperties.body.extend === true
+            ? true
+            : false;
 
-        const lastName =
-            typeof requestProperties.body.lastName === 'string' &&
-                requestProperties.body.lastName.trim().length > 0
-                ? requestProperties.body.lastName
-                : false;
+    if (id && extend) {
+        data.read('tokens', id, (err, tokenData) => {
+            let tokenObject = parseJSON(tokenData);
 
-        const password =
-            typeof requestProperties.body.password === 'string' &&
-                requestProperties.body.password.trim().length > 0
-                ? requestProperties.body.password
-                : false;
-
-        if (firstName || lastName || password) {
-            // lookup the uesr
-            data.read('users', phone, (err, uData) => {
-                const userData = { ...parseJSON(uData) };
-                if (!err && uData) {
-                    if (firstName) {
-                        userData.firstName = firstName;
+            if (tokenObject.expires > Date.now()) {
+                tokenObject.expires = Date.now() + 60 * 60 * 1000;
+                data.update('tokens', id, tokenObject, (err2) => {
+                    if (!err2) {
+                        callback(200)
+                    } else {
+                        callback(500, {
+                            error: 'There was a problem in the server side!',
+                        })
                     }
-                    if (lastName) {
-                        userData.lastName = lastName;
-                    }
-                    if (password) {
-                        userData.password = hash(password);
-                    }
-
-                    data.update('users', phone, userData, (err2) => {
-                        if (!err2) {
-                            callback(200, {
-                                message: 'User was updated successfully!',
-                            });
-                        } else {
-                            callback(500, {
-                                error: 'There was a problem in the server side!',
-                            });
-                        }
-                    });
-                } else {
-                    callback(400, {
-                        error: 'You have a problem in your request.',
-                    });
-                }
-            });
-        } else {
-            callback(400, {
-                error: 'You have a problem in your request.',
-            });
-        }
+                })
+            } else (400, {
+                error: 'Token already expired!',
+            })
+        })
     } else {
         callback(400, {
-            error: 'Invalid phone number, please try again.',
-        });
+            error: 'There was a problem in your request!',
+        })
     }
 };
 
 // delete user
 handler._token.delete = (requestProperties, callback) => {
-    // check the phone number is valide
-    const phone =
-        typeof requestProperties.queryStringObject.phone === 'string' &&
-            requestProperties.queryStringObject.phone.trim().length === 11
-            ? requestProperties.queryStringObject.phone
+    // check the token is valide
+    const id =
+        typeof requestProperties.queryStringObject.id === 'string' &&
+            requestProperties.queryStringObject.id.trim().length === 20
+            ? requestProperties.queryStringObject.id
             : false;
 
-    if (phone) {
+    if (id) {
         // lookup the user
-        data.read('users', phone, (err1, userData) => {
-            if (!err1 && userData) {
-                data.delete('users', phone, (err2) => {
+        data.read('tokens', id, (err1, tokenData) => {
+            if (!err1 && tokenData) {
+                data.delete('tokens', id, (err2) => {
                     if (!err2) {
                         callback(200, {
                             message: 'Successfully deleted',

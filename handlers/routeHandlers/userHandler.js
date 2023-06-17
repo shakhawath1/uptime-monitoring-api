@@ -87,7 +87,6 @@ handler._users.get = (requestProperties, callback) => {
         // lookup the user
         data.read('users', phone, (err, u) => {
             const user = { ...parseJSON(u) };
-            console.log(user)
 
             if (!err && user) {
                 delete user.password;
