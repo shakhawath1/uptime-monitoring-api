@@ -104,7 +104,7 @@ handler._token.get = (requestProperties, callback) => {
     }
 };
 
-// update user
+// update token
 handler._token.put = (requestProperties, callback) => {
     // check the token if valid
     const id =
@@ -145,7 +145,7 @@ handler._token.put = (requestProperties, callback) => {
     }
 };
 
-// delete user
+// delete token
 handler._token.delete = (requestProperties, callback) => {
     // check the token is valide
     const id =
@@ -181,5 +181,22 @@ handler._token.delete = (requestProperties, callback) => {
         });
     }
 };
+
+// token verify function
+handler._token.verify = (id, phone, callback) => {
+    data.read('tokens', id, (err, tokenData) => {
+        if (!err && tokenData) {
+            let tokenObject = parseJSON(tokenData);
+            if (tokenObject.phone === phone && tokenObject.expires > Date.now()) {
+                callback(true);
+            } else {
+                callback(false);
+            };
+        } else {
+            callback(false);
+        };
+    });
+};
+
 
 module.exports = handler;
