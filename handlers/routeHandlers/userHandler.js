@@ -122,28 +122,27 @@ handler._users.get = (requestProperties, callback) => {
 // update user
 handler._users.put = (requestProperties, callback) => {
     // check the phone number if valid
-    const phone = typeof requestProperties.body.phone === 'string'
+    const phone = typeof (requestProperties.body.phone) === 'string'
         && requestProperties.body.phone.trim().length === 11
         ? requestProperties.body.phone
         : false;
 
+
+    const firstName = typeof requestProperties.body.firstName === 'string'
+        && requestProperties.body.firstName.trim().length > 0
+        ? requestProperties.body.firstName
+        : false;
+
+    const lastName = typeof requestProperties.body.lastName === 'string'
+        && requestProperties.body.lastName.trim().length > 0
+        ? requestProperties.body.lastName
+        : false;
+
+    const password = typeof requestProperties.body.password === 'string'
+        && requestProperties.body.password.trim().length > 0
+        ? requestProperties.body.password
+        : false;
     if (phone) {
-        // lookup the user
-        const firstName = typeof requestProperties.body.firstName === 'string'
-            && requestProperties.body.firstName.trim().length > 0
-            ? requestProperties.body.firstName
-            : false;
-
-        const lastName = typeof requestProperties.body.lastName === 'string'
-            && requestProperties.body.lastName.trim().length > 0
-            ? requestProperties.body.lastName
-            : false;
-
-        const password = typeof requestProperties.body.password === 'string'
-            && requestProperties.body.password.trim().length > 0
-            ? requestProperties.body.password
-            : false;
-
         if (firstName || lastName || password) {
             // verify token
             let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
@@ -177,16 +176,17 @@ handler._users.put = (requestProperties, callback) => {
                                 }
                             });
                         } else {
-                            callback(403, {
-                                error: 'Authentication failure!'
+                            callback(400, {
+                                error: 'You have a problem in your request.',
                             });
                         }
                     });
 
                 } else {
-                    callback(400, {
-                        error: 'You have a problem in your request.',
+                    callback(403, {
+                        error: 'Authentication failure!'
                     });
+
                 }
             });
         } else {
