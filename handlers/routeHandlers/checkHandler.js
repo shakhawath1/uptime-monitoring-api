@@ -86,13 +86,13 @@ handler._check.post = (requestProperties, callback) => {
                                                             'There was a problem in the server side!',
                                                     });
                                                 }
-                                            })
+                                            });
                                         } else {
                                             callback(500, {
                                                 error: 'There was a problem in the server side!',
                                             });
                                         }
-                                    })
+                                    });
                                 } else {
                                     callback(401, {
                                         error: 'Userhas already reached max check limit!',
@@ -101,30 +101,62 @@ handler._check.post = (requestProperties, callback) => {
                             } else {
                                 callback(403, {
                                     error: 'Authentication problem!'
-                                })
+                                });
                             }
-                        })
+                        });
                     } else {
                         callback(403, {
                             error: 'User not found!'
-                        })
+                        });
                     }
-                })
+                });
             } else {
                 callback(403, {
                     error: 'Authentication problem!'
-                })
+                });
             }
-        })
+        });
     } else {
         callback(400, {
             error: 'You have a problem in your request!'
-        })
+        });
     }
 };
 
 // get check
 handler._check.get = (requestProperties, callback) => {
+    const id =
+        typeof requestProperties.queryStringObject.id === 'string' &&
+            requestProperties.queryStringObject.id.trim().length === 20
+            ? requestProperties.queryStringObject.id
+            : false;
+    if (id) {
+        // lookup the check
+        data.read('checks', id, (err, checkData) => {
+            let checkObject = parseJSON(checkData);
+            if (!err && checkObject) {
+                let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
+
+                tokenHandler._token.verify(token, checkObject.userPhone, (tokenIsValid) => {
+                    if (tokenIsValid) {
+                        callback(200, checkObject)
+                    } else {
+                        callback(403, {
+                            error: 'Authentication problem!'
+                        });
+                    }
+                });
+            } else {
+                callback(400, {
+                    error: 'You have a problem in your request!'
+                });
+            }
+        });
+    } else {
+        callback(400, {
+            error: 'You have a problem in your request!'
+        });
+    }
 };
 
 // update check
