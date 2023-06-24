@@ -187,7 +187,7 @@ handler._check.put = (requestProperties, callback) => {
                     tokenHandler._token.verify(token, checkObject.userPhone, (tokenIsValid) => {
                         if (tokenIsValid) {
                             if (protocol) {
-                                checkObject.protocl = protocol;
+                                checkObject.protocol = protocol;
                             }
                             if (url) {
                                 checkObject.url = url;
@@ -207,7 +207,9 @@ handler._check.put = (requestProperties, callback) => {
                                 if (!err2) {
                                     callback(200)
                                 } else {
-
+                                    callback(500, {
+                                        error: 'There was a server side error!',
+                                    });
                                 }
                             });
                         } else {
