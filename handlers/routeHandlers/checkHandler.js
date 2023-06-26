@@ -253,15 +253,7 @@ handler._check.delete = (requestProperties, callback) => {
                             parseJSON(checkData).userPhone,
                             (err3, userData) => {
                                 const userObject = parseJSON(userData);
-                                if (!err3 && userData) {
-                                    const userChecks =
-                                        typeof userObject.checks === 'object' &&
-                                            userObject.checks instanceof Array
-                                            ? userObject.checks
-                                            : [];
 
-
-                                }
                             }
                         );
                     } else {
