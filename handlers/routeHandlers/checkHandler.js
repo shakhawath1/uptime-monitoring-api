@@ -283,18 +283,7 @@ handler._check.delete = (requestProperties, callback) => {
                                             userObject.checks = userChecks;
                                             userObject.checks.push(checkId);
 
-                                            // save the new user data
-                                            data.update('users', userPhone, userObject, (err4) => {
-                                                if (!err4) {
-                                                    // return the data about the new check
-                                                    callback(200, checkObject)
-                                                } else {
-                                                    callback(500, {
-                                                        error:
-                                                            'There was a problem in the server side!',
-                                                    });
-                                                }
-                                            });
+
                                         } else {
                                             callback(500, {
                                                 error: 'There was a problem in the server side!',
