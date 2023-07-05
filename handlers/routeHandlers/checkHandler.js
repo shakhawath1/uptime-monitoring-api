@@ -238,78 +238,63 @@ handler._check.put = (requestProperties, callback) => {
 
 // delete check
 handler._check.delete = (requestProperties, callback) => {
-    let protocol = typeof (requestProperties.body.protocol) === 'string' && ['http', 'https'].indexOf(requestProperties.body.protocol) > -1 ? requestProperties.body.protocol : false;
+    const id =
+        typeof requestProperties.queryStringObject.id === 'string' &&
+            requestProperties.queryStringObject.id.trim().length === 20
+            ? requestProperties.queryStringObject.id
+            : false;
+    if (id) {
+        // lookup the check
+        data.read('checks', id, (err, checkData) => {
+            let checkObject = parseJSON(checkData);
+            let userPhone = checkObject.userPhone;
+            if (!err && checkObject) {
+                let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
 
-    let url = typeof (requestProperties.body.url) === 'string' && requestProperties.body.url.trim().length > 0 ? requestProperties.body.url : false;
+                tokenHandler._token.verify(token, userPhone, (tokenIsValid) => {
+                    if (tokenIsValid) {
+                        // delete the check data
+                        data.delete('checks', id, (err2) => {
+                            if (!err2) {
+                                data.read('users', userPhone, (err3, userData) => {
+                                    let userObject = parseJSON(userData);
+                                    if (!err3 && userObject) {
+                                        let userChecks = typeof (userObject.checks) === 'object' && userObject.checks instanceof Array ? userObject.checks : [];
 
-    let method = typeof (requestProperties.body.method) === 'string' && ['POST', 'GET', 'PUT', 'DELETE'].indexOf(requestProperties.body.method) > -1 ? requestProperties.body.method : false;
-
-    let successCodes = typeof (requestProperties.body.successCodes) === 'object' && requestProperties.body.successCodes instanceof Array ? requestProperties.body.successCodes : false;
-
-    let timeOutSeconds = typeof (requestProperties.body.timeOutSeconds) === 'number' && requestProperties.body.timeOutSeconds % 1 === 0 && requestProperties.body.timeOutSeconds >= 1 && requestProperties.body.timeOutSeconds <= 5 ? requestProperties.body.timeOutSeconds : false;
-
-    if (protocol && url && method && successCodes && timeOutSeconds) {
-        let token = typeof (requestProperties.headersObject.token) === 'string' ? requestProperties.headersObject.token : false;
-
-        // lookup the user phone by reading the token 
-        data.read('tokens', token, (err, tokenData) => {
-            if (!err && tokenData) {
-                let userPhone = parseJSON(tokenData).phone;
-
-                // lookup tha user Data
-                data.read('users', userPhone, (err, userData) => {
-                    if (!err && userData) {
-                        tokenHandler._token.verify(token, userPhone, (tokenIsValid) => {
-                            if (tokenIsValid) {
-                                let userObject = parseJSON(userData);
-                                let userChecks = typeof (userObject.checks) === 'object' && userObject.checks instanceof Array ? userObject.checks : [];
-
-                                if (userChecks.length <= maxChecks) {
-                                    let checkId = createRandomStaring(20);
-                                    let checkObject = {
-                                        'id': checkId,
-                                        userPhone,
-                                        protocol,
-                                        url,
-                                        method,
-                                        successCodes,
-                                        timeOutSeconds
-                                    }
-
-                                    // create check
-                                    data.create('checks', checkId, checkObject, (err3) => {
-                                        if (!err3) {
-                                            // add checkId to the user's object
+                                        // remove the deleted check id from user checks
+                                        let checkPosition = userObject.checks.indexOf(id);
+                                        if (checkPosition > -1) {
+                                            userChecks.splice(checkPosition, 1);
                                             userObject.checks = userChecks;
-                                            userObject.checks.push(checkId);
 
+                                            // update the user check list
+                                            data.update('users', userPhone, userObject, (err4) => {
+                                                if (!err4) {
+                                                    callback(200)
+                                                } else {
 
+                                                }
+                                            })
                                         } else {
-                                            callback(500, {
-                                                error: 'There was a problem in the server side!',
-                                            });
+
                                         }
-                                    });
-                                } else {
-                                    callback(401, {
-                                        error: 'Userhas already reached max check limit!',
-                                    });
-                                }
-                            } else {
-                                callback(403, {
-                                    error: 'Authentication problem!'
+                                    } else {
+
+                                    }
                                 });
+                            } else {
+
                             }
                         });
                     } else {
                         callback(403, {
-                            error: 'User not found!'
+                            error: 'Authentication problem!'
                         });
                     }
                 });
             } else {
-                callback(403, {
-                    error: 'Authentication problem!'
+                callback(400, {
+                    error: 'You have a problem in your request!'
                 });
             }
         });
@@ -318,7 +303,7 @@ handler._check.delete = (requestProperties, callback) => {
             error: 'You have a problem in your request!'
         });
     }
-}
+};
 
 
 
