@@ -16,6 +16,11 @@ environments.staging = {
     envName: 'staging',
     secretKey: 'jhajgkjdklsj',
     maxChecks: 5,
+    twilio: {
+        fromPhone: '+15005550006',
+        accountSid: '',
+        authToken: ''
+    }
 };
 
 // production environment
