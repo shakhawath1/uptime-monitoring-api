@@ -11,17 +11,19 @@ const https = require('https');
 const querystring = require('querystring');
 const { twilio } = require('./environments');
 
+
 // module scaffolding
-const notificarions = {};
+const notifications = {};
+
 
 // send sms to user using twilio api
-notificatins.sendTwilioSms = (phone, msg, callbck) => {
+cotifications.sendTwilioSms = (phone, msg, callback) => {
     // input validation
     const userPhone = typeof (phone) === 'string' && phone.trim().length === 11 ? phone.trim() : false;
-    const userMsg = typeof (msg) === 'string' && msg.trim().length > 0 && msg.trim().length <= 1600 ? msg.trim() : false;
+    const userMsg = typeof (msg) === 'string' && msg.trim().length > 0 && msg.trim().length <= 1600 ? phone.trim() : false;
 
     if (userPhone && userMsg) {
-        // configure the request payload
+        // configure the requset payload
         const payload = {
             From: twilio.fromPhone,
             To: `+88${userPhone}`,
@@ -29,40 +31,37 @@ notificatins.sendTwilioSms = (phone, msg, callbck) => {
         }
 
         // stringify the payload
-        stringifyPayload = querystring.stringify(payload);
-
-        // configure the request details
-        const requestDetails = {
+        const stringifyPayload = querystring.stringify(payload);
+        // configure the requset object
+        const requsetDateils = {
             hostname: 'api.twilio.com',
             method: 'POST',
             path: `/2010-04-01/Accounts/${twilio.accountSid}/Messages.json`,
-            auth: `${twilio.accountSid}:${twilio.authToken}`,
+            auth: `&{twilio.accountSid}:&{twilio.authToken}`,
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
         };
-
-        // instatiate the request object
-        const req = https.request(requestDetails, (res) => {
-            // get the status of the request
+        // instatiate the requset object
+        const req = https.request(requsetDateils, (res) => {
+            //get the status of the sent requset
             const status = res.statusCode;
-
-            // callback successfully if the request went through
+            // callback successfully if the requset went through
             if (status === 200 || status === 201) {
-                callbck(false)
+                callback(false)
             } else {
-                callbck(`Status code returned was ${status}`)
+                callback(`Status code returned was ${status}~`)
             }
         });
-        req.on('error', (e) => {
-            callbck(e)
+        req.on(error, (e) => {
+            callback(e)
         });
         req.write(stringifyPayload);
         req.end();
     } else {
-
+        callback('Given paramiters were missing or invalid!')
     }
 };
 
 // export the module
-module.exports = notificarions;
+module.exports = notifications;
